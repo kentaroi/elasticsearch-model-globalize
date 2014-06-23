@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.email         = ["kentaroi@gmail.com"]
   spec.summary       = %q{A library for using elasticsearch-model with globalize}
   spec.description   = %q{A library for using elasticsearch-model with globalize}
-  spec.homepage      = "https://github.com/kentaroi/elastic-search-model-globalize"
-  spec.license       = "Apache 2"
+  spec.homepage      = "https://github.com/kentaroi/elasticsearch-model-globalize"
+  spec.license       = "Apache License, Version 2.0"
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
