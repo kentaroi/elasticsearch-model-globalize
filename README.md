@@ -1,7 +1,9 @@
 # Elasticsearch::Model::Globalize
 
-`elasticsearch-model-globalize` library allows you to use `elasticsearch-model` library
-with `Globalize` gem.
+`elasticsearch-model-globalize` library allows you to use
+[elasticsearch-model](https://github.com/elasticsearch/elasticsearch-rails/tree/master/elasticsearch-model)
+\[[LICENSE](https://github.com/elasticsearch/elasticsearch-rails/blob/master/elasticsearch-model/LICENSE.txt)\]
+with [Globalize](https://github.com/globalize/globalize) \[[LICENSE](https://github.com/globalize/globalize/blob/master/LICENSE)\].
 
 
 ## Installation
@@ -21,7 +23,9 @@ Or install it yourself as:
 
 ## Usage
 
-There are a few ways to use `elasticsearch-model` with `Globalize`.
+There are a few ways to use
+[elasticsearch-model](https://github.com/elasticsearch/elasticsearch-rails/tree/master/elasticsearch-model)
+with [Globalize](https://github.com/globalize/globalize).
 
 This gem has two modules, one is `MultipleFields` and the other is `OneIndexPerLanguage`.
 You can choose one for each model to fit your needs by simply including a module.
@@ -48,14 +52,6 @@ class Item < ActiveRecord::Base
   include Elasticsearch::Model
   include Elasticsearch::Model::Callbacks
   include Elasticsearch::Model::Globalize::MultipleFields
-
-  mapping do
-    indexes :id,             type: 'integer'
-    indexes :name_ja,        analyzer: 'kuromoji'
-    indexes :name_en,        analyzer: 'snowball'
-    indexes :description_ja, analyzer: 'kuromoji'
-    indexes :description_en, analyzer: 'snowball'
-  end
 end
 ```
 
@@ -73,7 +69,50 @@ Elasticsearch::Model::Globalize::MultipleFields.localized_name do |name, locale|
 end
 ```
 
-One thing you have to care about is that put `translates` line before includeing
+The way to define `mappings` and `as_indexed_json` is same as
+[elasticsearch-model](https://github.com/elasticsearch/elasticsearch-rails/tree/master/elasticsearch-model)
+without this library.
+
+```ruby
+class Item < ActiveRecord::Base
+  translates :name, :description
+  include Elasticsearch::Model
+  include Elasticsearch::Model::Callbacks
+  include Elasticsearch::Model::Globalize::MultipleFields
+
+  mapping do
+    indexes :id,             type: 'integer'
+    indexes :name_ja,        analyzer: 'kuromoji'
+    indexes :name_en,        analyzer: 'snowball'
+    indexes :description_ja, analyzer: 'kuromoji'
+    indexes :description_en, analyzer: 'snowball'
+  end
+
+  def as_indexed_json(options={})
+    { id: id,
+      name_ja: name_ja,
+      name_en: name_en,
+      description_ja: description_ja,
+      description_en: description_en }
+  end
+end
+```
+
+Getters and setters of the derived fields are automatically added by `MultipleFields` module.
+
+```ruby
+I18n.locale = :en
+item = Item.new
+item.name_ja = '輪ゴム'
+item.name_ja # => "輪ゴム"
+item.name # => nil
+Globalize.with_locale(:ja) { item.name } # => "輪ゴム"
+item.name = 'elastic'
+item.name # => "elastic"
+item.name_en # => "elastic"
+```
+
+One thing you have to care about is that put `translates` line before including
 `Elasticsearch::Model::Globalize::MultipleFields`, otherwise `MultipleFields` module are not able to
 know from which fields to derive localized fields.
 
