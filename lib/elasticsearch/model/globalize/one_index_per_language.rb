@@ -107,8 +107,9 @@ module Elasticsearch
             else
               errors = Hash.new
               I18n.available_locales.each do |locale|
+                super_options = options.clone
                 ::Globalize.with_locale(locale) do
-                  errors[locale] = super(options, &block)
+                  errors[locale] = super(super_options, &block)
                 end
               end
               self.find_each do |record|
