@@ -65,7 +65,7 @@ You can customize the way to localize field names.
 ```ruby
 # Put this in config/initializers/elasticsearch-model-globalize.rb
 Elasticsearch::Model::Globalize::MultipleFields.localized_name do |name, locale|
-  "#{locale}_#{name}"
+  "#{name}_#{locale}"
 end
 ```
 
@@ -148,14 +148,14 @@ You can use `index_name_base` and `documenty_type_base` in addition to `index_na
 `document_type`.
 
 
-You can define mappings using `globalized_maping` as follows:
+You can define mappings using `globalized_mapping` as follows:
 
 ```ruby
 class Item < ActiveRecord::Base
   translates :name, :description
   include Elasticsearch::Model
   include Elasticsearch::Model::Callbacks
-  include Elasticsearch::Model::OneIndexPerLanguage
+  include Elasticsearch::Model::Globalize::OneIndexPerLanguage
 
   globalized_mapping do |locale|
     analyzer = locale == :ja ? 'kuromoji' : 'snowball'
