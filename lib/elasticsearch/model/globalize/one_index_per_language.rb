@@ -30,9 +30,7 @@ module Elasticsearch
         end
 
         def self.localized_name(name=nil, locale=nil, &block)
-          @localizer = block if block_given?
-
-          @localizer ? @localizer.call(name, locale) : "#{name}-#{locale}"
+          block_given? ? block.call(name, locale) : "#{name}-#{locale}"
         end
 
         module ClassMethods
