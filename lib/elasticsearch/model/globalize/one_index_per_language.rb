@@ -30,7 +30,9 @@ module Elasticsearch
         end
 
         def self.localized_name(name=nil, locale=nil, &block)
-          block_given? ? block.call(name, locale) : "#{name}-#{locale}"
+          @localizer = block if block_given?
+
+          @localizer ? @localizer.call(name, locale) : "#{name}-#{locale}"
         end
 
         module ClassMethods
@@ -66,8 +68,7 @@ module Elasticsearch
 
           def document_type name=nil
             @document_type = name if name
-            @document_type || document_types[::Globalize.locale] ||=
-              ::Elasticsearch::Model::Globalize::OneIndexPerLanguage.localized_name(document_type_base, ::Globalize.locale)
+            @document_type || document_types[::Globalize.locale] ||= "#{document_type_base}-#{::Globalize.locale}"
           end
 
           def document_types
