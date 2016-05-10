@@ -12,19 +12,19 @@ module Elasticsearch
 
             locales.each do |locale|
               translated_attribute_names.each do |name|
-                localized_name = MultipleFields.localized_name(name, locale)
+                loc_name = MultipleFields.localized_name(name, locale).gsub('-','_')
 
                 class_eval <<-METHOD, __FILE__, __LINE__ + 1 # Define getter
-                def #{localized_name}
-                  globalize.stash.contains?(:#{locale}, '#{name}') ? globalize.stash[:#{locale}]['#{name}']
-                                                                   : translation_for(:#{locale}, false).try(:read_attribute, '#{name}')
+                def #{loc_name}
+                  globalize.stash.contains?('#{locale}', '#{name}') ? globalize.stash['#{locale}']['#{name}']
+                                                                   : translation_for('#{locale}', false).try(:read_attribute, '#{name}')
                 end
                 METHOD
 
                 class_eval <<-METHOD, __FILE__, __LINE__ + 1 # Define setter
-                def #{localized_name}=(val)
-                  attribute_will_change!(:#{localized_name})
-                  write_attribute('#{name}', val, locale: :#{locale})
+                def #{loc_name}=(val)
+                  attribute_will_change!(:#{loc_name})
+                  write_attribute('#{name}', val, locale: '#{locale}')
                 end
                 METHOD
               end
@@ -33,7 +33,7 @@ module Elasticsearch
             translated_attribute_names.each do |name|
               class_eval <<-METHOD, __FILE__, __LINE__ + 1
               def #{name}=(val)
-                attribute_will_change!(::Elasticsearch::Model::Globalize::MultipleFields.localized_name('#{name}', ::Globalize.locale))
+                attribute_will_change!(::Elasticsearch::Model::Globalize::MultipleFields.localized_name('#{name}', ::Globalize.locale).gsub('-','_'))
                 write_attribute('#{name}', val)
               end
               METHOD
@@ -58,14 +58,14 @@ module Elasticsearch
 
         module InstanceMethods
           def as_globalized_json(options={})
-            h = self.as_json
+            h = self.as_json(options)
 
             translated_attribute_names.each do |name|
               h.delete(name.to_s)
 
               self.class.locales.each do |locale|
-                localized_name = Elasticsearch::Model::Globalize::MultipleFields.localized_name(name, locale)
-                h[localized_name] = send(localized_name)
+                loc_name = Elasticsearch::Model::Globalize::MultipleFields.localized_name(name, locale).gsub('-','_')
+                h[loc_name] = send(loc_name)
               end
             end
             h
