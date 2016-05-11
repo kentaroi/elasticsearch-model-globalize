@@ -57,12 +57,15 @@ module Elasticsearch
         end
 
         module InstanceMethods
-          def as_globalized_json(options={})
-            h = self.as_json(options)
+          def as_globalized_json(options={}, parent_mapping = nil)
+            if !parent_mapping.nil?
+              h = parent_mapping
+            else
+              h = self.as_json(options)
+            end
 
             translated_attribute_names.each do |name|
               h.delete(name.to_s)
-
               self.class.locales.each do |locale|
                 loc_name = Elasticsearch::Model::Globalize::MultipleFields.localized_name(name, locale).gsub('-','_')
                 h[loc_name] = send(loc_name)
@@ -72,8 +75,9 @@ module Elasticsearch
           end
 
           def as_indexed_json(options={})
-            self.as_globalized_json(options.merge root: false)
+            self.as_globalized_json(options.merge(root: false), super(options))
           end
+
         end
       end
     end
