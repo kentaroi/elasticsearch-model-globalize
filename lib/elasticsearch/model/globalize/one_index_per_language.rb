@@ -105,11 +105,11 @@ module Elasticsearch
             if current_locale_only
               super(options, &block)
             else
-              errors = Hash.new
+              total_errors = 0
               I18n.available_locales.each do |locale|
                 super_options = options.clone
                 ::Globalize.with_locale(locale) do
-                  errors[locale] = super(super_options, &block)
+                  total_errors += super(super_options, &block)
                 end
               end
               self.find_each do |record|
@@ -119,7 +119,7 @@ module Elasticsearch
                   end
                 end
               end
-              errors
+              total_errors
             end
           end
         end
