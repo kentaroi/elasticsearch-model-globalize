@@ -225,7 +225,10 @@ module Elasticsearch
           common_changed_attributes = Hash[ changes.map{ |key, value| [key, value.last] } ]
           translated_attribute_names.each { |k| common_changed_attributes.delete(k) }
 
-          globalize.stash.reject{ |locale, attrs| attrs.empty? }.each do |locale, attrs|
+          stash = globalize.stash
+          stash = stash.reject{ |locale, attrs| attrs.empty? } if common_changed_attributes.empty?
+
+          stash.each do |locale, attrs|
             __elasticsearch__.changed_attributes_by_locale[locale] = attrs.merge(common_changed_attributes)
           end
           true
