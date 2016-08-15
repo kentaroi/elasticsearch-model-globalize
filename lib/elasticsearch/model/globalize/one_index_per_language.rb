@@ -113,6 +113,7 @@ module Elasticsearch
                   errors[locale] = super(super_options, &block)
                 end
               end
+              super(options, &block)
               self.find_each do |record|
                 (I18n.available_locales - record.translations.pluck(:locale).map(&:to_sym)).each do |locale|
                   ::Globalize.with_locale(locale) do
