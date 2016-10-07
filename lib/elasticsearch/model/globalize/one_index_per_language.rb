@@ -108,14 +108,16 @@ module Elasticsearch
               errors = Hash.new
               I18n.available_locales.each do |locale|
                 super_options = options.clone
+                super_options[:index] = "#{self.index_name}-#{locale}".downcase
                 ::Globalize.with_locale(locale) do
                   errors[locale] = super(super_options, &block)
                 end
               end
+              super(options, &block)
               self.find_each do |record|
                 (I18n.available_locales - record.translations.pluck(:locale).map(&:to_sym)).each do |locale|
                   ::Globalize.with_locale(locale) do
-                    record.__elasticsearch__.delete_document(current_locale_only: true)
+                    # record.__elasticsearch__.delete_document(current_locale_only: true)
                   end
                 end
               end
