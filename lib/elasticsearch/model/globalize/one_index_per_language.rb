@@ -117,7 +117,7 @@ module Elasticsearch
               self.find_each do |record|
                 (I18n.available_locales - record.translations.pluck(:locale).map(&:to_sym)).each do |locale|
                   ::Globalize.with_locale(locale) do
-                    record.__elasticsearch__.delete_document(current_locale_only: true)
+                    # record.__elasticsearch__.delete_document(current_locale_only: true)
                   end
                 end
               end
